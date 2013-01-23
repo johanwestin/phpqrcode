@@ -3533,8 +3533,12 @@
         //----------------------------------------------------------------------
         public static function svg($frame, $filename = false, $pixelPerPoint = 4, $outerFrame = 4,$saveandprint=FALSE, $back_color, $fore_color) 
         {
+            global $PHPQRCODE_FOR_INLINE_USE;
             $vect = self::vectSVG($frame, $pixelPerPoint, $outerFrame, $back_color, $fore_color);
             
+            if(isset($PHPQRCODE_FOR_INLINE_USE))
+                return $vect;
+
             if ($filename === false) {
                 header("Content-Type: image/svg+xml");
                 header('Content-Disposition: filename="qrcode.svg"');
@@ -3563,14 +3567,6 @@
             
             
             $output = 
-            '<?xml version="1.0" encoding="utf-8"?>'."\n".
-            '<svg version="1.1" baseProfile="full"  width="'.$imgW * $pixelPerPoint.'" height="'.$imgH * $pixelPerPoint.'" viewBox="0 0 '.$imgW * $pixelPerPoint.' '.$imgH * $pixelPerPoint.'"
-             xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:ev="http://www.w3.org/2001/xml-events">'."\n".
-            '<desc></desc>'."\n";
-
-            $output = 
-            '<?xml version="1.0" encoding="utf-8"?>'."\n".
-            '<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd">'."\n".
             '<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" xmlns:xlink="http://www.w3.org/1999/xlink" width="'.$imgW * $pixelPerPoint.'" height="'.$imgH * $pixelPerPoint.'" viewBox="0 0 '.$imgW * $pixelPerPoint.' '.$imgH * $pixelPerPoint.'">'."\n".
             '<desc></desc>'."\n";
                 
@@ -3582,12 +3578,15 @@
             $output .= 
             '<defs>'."\n".
             '<rect id="p" width="'.$pixelPerPoint.'" height="'.$pixelPerPoint.'" />'."\n".
-            '</defs>'."\n".
-            '<g fill="#'.dechex($fore_color).'">'."\n";
-                
-                
-            // Convert the matrix into pixels
+            '</defs>'."\n";
 
+            $html_color = dechex($fore_color);
+            if($html_color == "0")
+                $html_color = "#000000";
+
+            $output .= '<g fill="' . $html_color . '">'."\n";
+
+            // Convert the matrix into pixels
             for($i=0; $i<$h; $i++) {
                 for($j=0; $j<$w; $j++) {
                     if( $frame[$i][$j] == '1') {
@@ -3597,6 +3596,7 @@
                     }
                 }
             }
+
             $output .= 
             '</g>'."\n".
             '</svg>';
